@@ -1,9 +1,8 @@
 import java.util.List;
 
 public class SequenceData {
-
-    private final List<Note> leftHand;
-    private final List<Note> rightHand;
+    private List<Note> leftHand;
+    private List<Note> rightHand;
 
     public SequenceData(List<Note> leftHand, List<Note> rightHand) {
         this.leftHand = leftHand;
@@ -13,7 +12,6 @@ public class SequenceData {
     public List<Note> getLeftHand() {
         return leftHand;
     }
-
     public List<Note> getRightHand() {
         return rightHand;
     }

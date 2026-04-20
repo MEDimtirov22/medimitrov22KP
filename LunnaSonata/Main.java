@@ -1,64 +1,56 @@
-import javax.sound.midi.*;
 import java.util.Scanner;
 
 public class Main {
 
-    private static PlaybackEngine player = null;
+    private static LeftHandThread leftThread;
+    private static RightHandThread rightThread;
 
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
 
-        System.out.println("Moonlight Sonata – simplified console player");
-        System.out.println("Approximate tempo: 50 BPM");
-        System.out.println();
+        System.out.println("Lunna Sonata");
+        System.out.println("p = play | s = stop | q = quit");
 
         while (true) {
-            System.out.println("Commands:");
-            System.out.println("  p   - play");
-            System.out.println("  s   - stop");
-            System.out.println("  q   - quit");
-            System.out.print("- ");
-
-            String cmd = sc.nextLine();
+            String cmd = sc.nextLine().trim().toLowerCase();
 
             if (cmd.equals("p")) {
-                if (player != null && player.isActive()) {
-                    System.out.println("Already playing...");
+                if (isPlaying()) {
+                    System.out.println("Already playing!");
                     continue;
                 }
 
-                try {
-                    SequenceData data = Music.createOpeningSequence();
-                    Sequence midiSequence = Converter.convertToMidiSequence(data);
+                SequenceData data = Music.createOpeningSequence();
 
-                    player = new PlaybackEngine();
-                    player.play(midiSequence, 50f);
-                    System.out.println("Playing... (press 's' to stop)");
-                } catch (Exception e) {
-                    System.out.println("Cannot start playback: " + e.getMessage());
-                }
+                leftThread = new LeftHandThread(data.getLeftHand());
+                rightThread = new RightHandThread(data.getRightHand());
+
+                leftThread.start();
+                rightThread.start();
             }
             else if (cmd.equals("s")) {
-                if (player != null) {
-                    player.stop();
-                    player = null;
-                    System.out.println("Stopped.");
-                } else {
-                    System.out.println("Nothing is playing.");
-                }
+                stopMusic();
+                System.out.println("Stopped.");
             }
-            else if (cmd.equals("q") || cmd.equals("quit")) {
-                if (player != null) {
-                    player.stop();
-                }
+            else if (cmd.equals("q")) {
+                stopMusic();
                 System.out.println("Goodbye.");
                 break;
             }
-            else {
-                System.out.println("Unknown command.");
-            }
         }
-
         sc.close();
+    }
+
+    private static boolean isPlaying() {
+        return (leftThread != null && leftThread.isAlive()) || (rightThread != null && rightThread.isAlive());
+    }
+
+    private static void stopMusic() {
+        if (leftThread != null){
+            leftThread.stopPlaying();
+        }
+        if (rightThread != null){
+            rightThread.stopPlaying();
+        }
     }
 }
